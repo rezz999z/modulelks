@@ -1,0 +1,34 @@
+
+Hardening Document Host Information
+echo "Welcome to Secure Server" > /etc/issue
+echo "Unauthorized access is prohibited" > /etc/issue.net
+chmod 644 /etc/issue /etc/issue.net
+
+Closed Unusual Open Port
+firewall-cmd --permanent --remove-port=8080/tcp
+firewall-cmd --reload
+
+Hardening Whitelisting SELinux
+setenforce 1 / vi /etc/selinux/config
+sed -i 's/SELINUX=permissive/SELINUX=enforcing/g' /etc/selinux/config
+
+Hardening CHROOT Shell
+mkdir -p /chroot/{bin,lib,lib64,home,dev,etc}
+cp /bin/bash /chroot/bin/
+
+Hardening Certificate Shell Login
+echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+echo "AuthenticationMethods publickey" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+Hardening Directory Listing
+sed -i 's/Options Indexes FollowSymLinks/Options -Indexes/' /etc/httpd/conf/httpd.conf
+systemctl restart httpd
+
+Hardening Remote Command Execution
+echo "ALL: ALL" >> /etc/hosts.deny
+chmod 644 /etc/hosts.deny
+
+Pengujian dan Monitoring
+yum install epel-release -y
+lynis audit system
