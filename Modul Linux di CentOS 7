@@ -119,6 +119,12 @@ yum install gcc make flex bison libpcap libpcap-devel pcre pcre-devel libdnet li
 wget https://snort.org/downloads/snort/snort-2.9.18.1-1.el7.x86_64.rpm
 rpm -ivh snort-2.9.18.1-1.el7.x86_64.rpm
 
+[snort]
+name=Snort
+baseurl=https://www.snort.org/downloads/snort/snort-2.9.18.1-1.el7.x86_64.rpm
+enabled=1
+gpgcheck=0
+
 systemctl start snort
 
 
