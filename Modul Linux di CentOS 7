@@ -1,6 +1,6 @@
 Hardening Document Host Information
 echo "Unauthorized access is prohibited" > /etc/issue
-echo "Unauthorized access is prohibited" > /etc/issue.net
+echo "Authorized Users Only - Unauthorized access is prohibited" > /etc/issue.net
 sed -i 's/#Banner none/Banner \/etc\/issue.net/' /etc/ssh/sshd_config
 chmod 644 /etc/issue /etc/issue.net
 systemctl restart sshd
@@ -14,8 +14,7 @@ Hardening Whitelisting SELinux
 semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?"
 restorecon -Rv /var/www/html
 setsebool -P httpd_enable_homedirs on
-setenforce 1 / vi /etc/selinux/config
-sed -i 's/SELINUX=permissive/SELINUX=enforcing/g' /etc/selinux/config
+vi /etc/selinux/config
 
 Hardening CHROOT Shell
 mkdir -p /chroot/{bin,lib64,dev,etc,home}
@@ -36,7 +35,7 @@ Hardening Remote Command Execution
 echo "ALL: ALL" >> /etc/hosts.deny
 chmod 644 /etc/hosts.deny
 
-Instalasi GnuPG (GPG) di CentOS 7
+Instalasi GnuPG di CentOS 7
 gpg --gen-key
 gpg --list-keys
 vi message.txt
@@ -114,26 +113,19 @@ verb 3
 openvpn --config /etc/openvpn/client/client.ovpn
 
 Konfigurasi IDS
-yum update
-yum install gcc make flex bison libpcap libpcap-devel pcre pcre-devel libdnet libdnet-devel zlib zlib-devel -y
-wget https://snort.org/downloads/snort/snort-2.9.18.1-1.el7.x86_64.rpm
-rpm -ivh snort-2.9.18.1-1.el7.x86_64.rpm
+yum install gcc make pcre-devel libpcap-devel libyaml-devel libnet-devel \
+libmaxminddb-devel jansson-devel nss-devel zlib-devel pfring-devel -y
+yum install suricata -y
+vi /etc/suricata/suricata.yaml
+systemctl start suricata
+systemctl enable suricata
+systemctl status suricata
+sudo firewall-cmd --permanent --zone=public --add-port=3000/tcp
+sudo firewall-cmd --reload
+tail -f /var/log/suricata/eve.json
 
-[snort]
-name=Snort
-baseurl=https://www.snort.org/downloads/snort/snort-2.9.18.1-1.el7.x86_64.rpm
-enabled=1
-gpgcheck=0
-yum --disablerepo=snort install snort -y
-yum-config-manager --disable snort
-subscription-manager repos --disable=snort
-yum-config-manager --save --setopt=snort.skip_if_unavailable=true
-
-
-systemctl start snort
-
-sudo nano /etc/httpd/modsecurity.d/activated_rules/modsecurity_crs_21_protocol_anomalies.conf
-grep "960017" /etc/httpd/modsecurity.d/activated_rules/*
+ModEvasive dan ModSecurity
+yum install mod_evasive -y
 
 <IfModule mod_headers.c>
 
