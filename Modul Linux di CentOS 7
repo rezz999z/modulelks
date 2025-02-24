@@ -5,7 +5,6 @@ sed -i 's/#Banner none/Banner \/etc\/issue.net/' /etc/ssh/sshd_config
 chmod 644 /etc/issue /etc/issue.net
 systemctl restart sshd
 
-
 Closed Unusual Open Port
 netstat -tulnp
 firewall-cmd --permanent --remove-port=8080/tcp
@@ -42,7 +41,6 @@ gpg --gen-key
 gpg --list-keys
 vi message.txt
 Ini adalah pesan terenkripsi dan ditandatangani secara digital
-
 gpg --armor --detach-sign message.txt
 gpg --armor --encrypt --sign --recipient emailpenerima@gmail.com message.txt
 gpg --decrypt message.txt.asc
@@ -68,7 +66,6 @@ openvpn --genkey --secret /etc/openvpn/ta.key
 cp pki/ca.crt pki/issued/server.crt pki/private/server.key pki/dh.pem /etc/openvpn/
 cp /etc/openvpn/ta.key /etc/openvpn/
 vi /etc/openvpn/server.conf
-
 port 1194
 proto udp
 dev tun
@@ -115,6 +112,12 @@ cipher AES-256-CBC
 auth SHA256
 verb 3
 openvpn --config /etc/openvpn/client/client.ovpn
+
+Konfigurasi IDS
+yum update
+yum install gcc make flex bison libpcap libpcap-devel pcre pcre-devel libdnet libdnet-devel zlib zlib-devel -y
+yum install snort -y
+systemctl start snort
 
 
 
