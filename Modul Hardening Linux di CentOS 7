@@ -1,23 +1,34 @@
 
 Hardening Document Host Information
-echo "Welcome to Secure Server" > /etc/issue
+echo "Unauthorized access is prohibited" > /etc/issue
 echo "Unauthorized access is prohibited" > /etc/issue.net
+sed -i 's/#Banner none/Banner \/etc\/issue.net/' /etc/ssh/sshd_config
 chmod 644 /etc/issue /etc/issue.net
+systemctl restart sshd
+
 
 Closed Unusual Open Port
+netstat -tulnp
+ss -tulnp
 firewall-cmd --permanent --remove-port=8080/tcp
 firewall-cmd --reload
 
 Hardening Whitelisting SELinux
+semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?"
+restorecon -Rv /var/www/html
+setsebool -P httpd_enable_homedirs on
 setenforce 1 / vi /etc/selinux/config
 sed -i 's/SELINUX=permissive/SELINUX=enforcing/g' /etc/selinux/config
 
 Hardening CHROOT Shell
-mkdir -p /chroot/{bin,lib,lib64,home,dev,etc}
+mkdir -p /chroot/{bin,lib64,dev,etc,home}
 cp /bin/bash /chroot/bin/
+cp -v /bin/{bash,ls,cat} /chroot/bin/
 
 Hardening Certificate Shell Login
-echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+ssh-keygen -t rsa -b 4096
+ssh-copy-id user@server
+sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 echo "AuthenticationMethods publickey" >> /etc/ssh/sshd_config
 systemctl restart sshd
 
@@ -26,9 +37,21 @@ sed -i 's/Options Indexes FollowSymLinks/Options -Indexes/' /etc/httpd/conf/http
 systemctl restart httpd
 
 Hardening Remote Command Execution
+mount -o remount,noexec /tmp
 echo "ALL: ALL" >> /etc/hosts.deny
 chmod 644 /etc/hosts.deny
 
 Pengujian dan Monitoring
 yum install epel-release -y
 lynis audit system
+
+Install dan Konfigurasi Fail2Ban
+yum install -y fail2ban
+systemctl enable --now fail2ban
+Edit /etc/fail2ban/jail.local:
+[sshd]
+enabled = true
+bantime = 600
+findtime = 600
+maxretry = 3
+systemctl restart fail2ban
