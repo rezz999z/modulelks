@@ -26,8 +26,6 @@ cp /bin/bash /chroot/bin/
 cp -v /bin/{bash,ls,cat} /chroot/bin/
 
 Hardening Certificate Shell Login
-ssh-keygen -t rsa -b 4096
-ssh-copy-id user@server
 sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 echo "AuthenticationMethods publickey" >> /etc/ssh/sshd_config
 systemctl restart sshd
