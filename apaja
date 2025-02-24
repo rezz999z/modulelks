@@ -1,9 +1,7 @@
 Hardening Document Host Information
 echo "Unauthorized access is prohibited" > /etc/issue
 echo "Authorized Users Only - Unauthorized access is prohibited" > /etc/issue.net
-sed -i 's/#Banner none/Banner \/etc\/issue.net/' /etc/ssh/sshd_config
 chmod 644 /etc/issue /etc/issue.net
-systemctl restart sshd
 
 Closed Unusual Open Port
 netstat -tulnp
@@ -84,6 +82,7 @@ persist-tun
 status /var/log/openvpn-status.log
 log-append /var/log/openvpn.log
 verb 3
+
 systemctl start openvpn@server
 systemctl enable openvpn@server
 firewall-cmd --add-service=openvpn --permanent
@@ -122,33 +121,69 @@ vi /etc/suricata/suricata.yaml
 systemctl start suricata
 systemctl enable suricata
 systemctl status suricata
-sudo firewall-cmd --permanent --zone=public --add-port=3000/tcp
-sudo firewall-cmd --reload
-tail -f /var/log/suricata/eve.json
 
 ModEvasive dan ModSecurity
 yum install mod_evasive -y
-
-<IfModule mod_headers.c>
-
-    # HTTP Strict Transport Security (HSTS) - Melindungi dari serangan downgrade HTTP ke HTTPS
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-
-    # X-Frame-Options - Mencegah Clickjacking
-    Header always set X-Frame-Options "SAMEORIGIN"
-
-    # X-Content-Type-Options - Mencegah MIME sniffing
-    Header always set X-Content-Type-Options "nosniff"
-
-    # Referrer-Policy - Mengontrol informasi referer
-    Header always set Referrer-Policy "no-referrer-when-downgrade"
-
-    # Permissions-Policy - Mengontrol akses fitur browser
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-
-    # Content-Security-Policy (CSP) - Mencegah XSS & injeksi script
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
-    
+ls -ld /var/log/httpd/mod_evasive
+mkdir -p /var/log/httpd/mod_evasive
+chmod 755 /var/log/httpd/mod_evasive
+chown apache:apache /var/log/httpd/mod_evasive
+touch /var/log/httpd/mod_evasive/dos.log
+chmod 666 /var/log/httpd/mod_evasive/dos.log
+chown apache:apache /var/log/httpd/mod_evasive/dos.log
+vi /etc/httpd/conf.d/mod_evasive.conf
+<IfModule mod_evasive20.c>
+    DOSHashTableSize 3097
+    DOSPageCount 2
+    DOSSiteCount 50
+    DOSPageInterval 1
+    DOSSiteInterval 1
+    DOSBlockingPeriod 600
+    DOSEmailNotify admin@google.com
+    DOSLogDir "/var/log/httpd/mod_evasive"
 </IfModule>
+systemctl restart httpd
+for i in {1..100}; do curl -s http://localhost/ > /dev/null & done
+cat /var/log/httpd/mod_evasive/dos.log
+cat /var/log/httpd/modsec_audit.log
+
+header web server
+yum install httpd -y
+systemctl start httpd
+systemctl enable httpd
+firewall-cmd --permanent --add-service=http
+firewall-cmd --permanent --add-service=https
+firewall-cmd --reload
+systemctl status httpd
+yum install php php-cli php-common -y
+echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
+systemctl restart httpd
+vi /etc/httpd/conf/httpd.conf (AllowOverride All)
+vi /etc/httpd/modsecurity.d/activated_rules/modsecurity_crs_21_protocol_anomalies.conf
+# SecRule REQUEST_HEADERS:Host "^[\d\.]+$" \
+#    "id:960017,phase:2,deny,status:403,msg:'Host header is an IP address'"
+http://IP_SERVER/phpinfo.php
+systemctl restart httpd
+
+httpd -M | grep headers
+/etc/httpd/conf.d/security_headers.conf
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "no-referrer-when-downgrade"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+</IfModule>
+curl -I http://localhost/phpinfo.php
+php -v
+yum install -y epel-release yum-utils
+yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+yum update -y
+yum-config-manager --enable remi-php80
+yum install -y php php-cli php-mysql php-pdo php-fpm php-xml php-mbstring php-curl php-opcache
+systemctl restart httpd
+
+
 
 
