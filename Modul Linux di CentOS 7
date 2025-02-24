@@ -53,6 +53,24 @@ set pgp_use_gpg = yes
 set pgp_auto_sign = yes
 mutt -s "Pesan Terenkripsi dan Ditandatangani" -e "set pgp_encrypt_as='pengirim@google.com'" -a message.txt.asc -- penerima@google.com < message.txt
 
+openvpn
+sudo yum install epel-release -y
+sudo yum install openvpn easy-rsa -y
+make-cadir ~/openvpn-ca
+cd ~/openvpn-ca
+cp /usr/share/doc/openvpn*/sample/sample-config-files/server.conf /etc/openvpn/
+vi /etc/openvpn/server.conf
+
+cd /openvpn-ca
+source ./vars
+./clean-all
+./build-ca
+./build-key-server server
+./build-dh
+./build-key client
+cp ~/openvpn-ca/keys/* /etc/openvpn/
+systemctl start openvpn@server
+systemctl enable openvpn@server
 
 
 
