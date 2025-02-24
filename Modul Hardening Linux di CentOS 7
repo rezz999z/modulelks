@@ -1,4 +1,3 @@
-
 Hardening Document Host Information
 echo "Unauthorized access is prohibited" > /etc/issue
 echo "Unauthorized access is prohibited" > /etc/issue.net
@@ -35,7 +34,6 @@ sed -i 's/Options Indexes FollowSymLinks/Options -Indexes/' /etc/httpd/conf/http
 systemctl restart httpd
 
 Hardening Remote Command Execution
-mount -o remount,noexec /tmp
 echo "ALL: ALL" >> /etc/hosts.deny
 chmod 644 /etc/hosts.deny
 
@@ -43,14 +41,17 @@ Instalasi GnuPG (GPG) di CentOS 7
 gpg --gen-key
 gpg --list-keys
 vi message.txt
+Ini adalah pesan terenkripsi dan ditandatangani secara digital
+
 gpg --armor --detach-sign message.txt
-gpg --armor --encrypt --sign --recipient [email penerima] message.txt
+gpg --armor --encrypt --sign --recipient emailpenerima@gmail.com message.txt
 gpg --decrypt message.txt.asc
 gpg --verify message.txt.asc
 yum install mutt -y
-set pgp_sign_as = "your_email@example.com"
+set pgp_sign_as = "pengirim@google.com"
 set pgp_use_gpg = yes
-mutt -s "Subject" -e "set pgp_encrypt_as='your_email@example.com'" -a message.txt.asc -- recipient@example.com < message.txt
+set pgp_auto_sign = yes
+mutt -s "Pesan Terenkripsi dan Ditandatangani" -e "set pgp_encrypt_as='pengirim@google.com'" -a message.txt.asc -- penerima@google.com < message.txt
 
 
 
