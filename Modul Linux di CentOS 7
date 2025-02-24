@@ -132,5 +132,6 @@ yum-config-manager --save --setopt=snort.skip_if_unavailable=true
 
 systemctl start snort
 
-
+sudo nano /etc/httpd/modsecurity.d/activated_rules/modsecurity_crs_21_protocol_anomalies.conf
+grep "960017" /etc/httpd/modsecurity.d/activated_rules/*
 
