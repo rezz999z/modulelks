@@ -9,7 +9,6 @@ systemctl restart sshd
 
 Closed Unusual Open Port
 netstat -tulnp
-ss -tulnp
 firewall-cmd --permanent --remove-port=8080/tcp
 firewall-cmd --reload
 
@@ -31,6 +30,7 @@ echo "AuthenticationMethods publickey" >> /etc/ssh/sshd_config
 systemctl restart sshd
 
 Hardening Directory Listing
+yum install httpd
 sed -i 's/Options Indexes FollowSymLinks/Options -Indexes/' /etc/httpd/conf/httpd.conf
 systemctl restart httpd
 
@@ -39,17 +39,22 @@ mount -o remount,noexec /tmp
 echo "ALL: ALL" >> /etc/hosts.deny
 chmod 644 /etc/hosts.deny
 
-Pengujian dan Monitoring
-yum install epel-release -y
-lynis audit system
+Instalasi GnuPG (GPG) di CentOS 7
+gpg --gen-key
+gpg --list-keys
+vi message.txt
+gpg --armor --detach-sign message.txt
+gpg --armor --encrypt --sign --recipient [email penerima] message.txt
+gpg --decrypt message.txt.asc
+gpg --verify message.txt.asc
+yum install mutt -y
+set pgp_sign_as = "your_email@example.com"
+set pgp_use_gpg = yes
+mutt -s "Subject" -e "set pgp_encrypt_as='your_email@example.com'" -a message.txt.asc -- recipient@example.com < message.txt
 
-Install dan Konfigurasi Fail2Ban
-yum install -y fail2ban
-systemctl enable --now fail2ban
-Edit /etc/fail2ban/jail.local:
-[sshd]
-enabled = true
-bantime = 600
-findtime = 600
-maxretry = 3
-systemctl restart fail2ban
+
+
+
+
+
+
