@@ -124,6 +124,11 @@ name=Snort
 baseurl=https://www.snort.org/downloads/snort/snort-2.9.18.1-1.el7.x86_64.rpm
 enabled=1
 gpgcheck=0
+yum --disablerepo=snort install snort -y
+yum-config-manager --disable snort
+subscription-manager repos --disable=snort
+yum-config-manager --save --setopt=snort.skip_if_unavailable=true
+
 
 systemctl start snort
 
