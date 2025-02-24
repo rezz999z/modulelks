@@ -116,7 +116,9 @@ openvpn --config /etc/openvpn/client/client.ovpn
 Konfigurasi IDS
 yum update
 yum install gcc make flex bison libpcap libpcap-devel pcre pcre-devel libdnet libdnet-devel zlib zlib-devel -y
-yum install snort -y
+wget https://snort.org/downloads/snort/snort-2.9.18.1-1.el7.x86_64.rpm
+rpm -ivh snort-2.9.18.1-1.el7.x86_64.rpm
+
 systemctl start snort
 
 
