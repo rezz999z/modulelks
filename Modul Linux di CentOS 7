@@ -115,6 +115,8 @@ openvpn --config /etc/openvpn/client/client.ovpn
 Konfigurasi IDS
 yum install gcc make pcre-devel libpcap-devel libyaml-devel libnet-devel \
 libmaxminddb-devel jansson-devel nss-devel zlib-devel pfring-devel -y
+curl -o /etc/yum.repos.d/OISF.repo https://copr.fedorainfracloud.org/coprs/oisf/suricata/repo/epel-7/oisf-suricata-epel-7.repo
+
 yum install suricata -y
 vi /etc/suricata/suricata.yaml
 systemctl start suricata
