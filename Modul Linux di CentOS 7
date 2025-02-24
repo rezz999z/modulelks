@@ -56,37 +56,43 @@ mutt -s "Pesan Terenkripsi dan Ditandatangani" -e "set pgp_encrypt_as='pengirim@
 openvpn
 sudo yum install epel-release -y
 sudo yum install openvpn easy-rsa -y
-make-cadir ~/openvpn-ca
-cd ~/openvpn-ca
-cp /usr/share/doc/openvpn*/sample/sample-config-files/server.conf /etc/openvpn/
+mkdir -p /etc/openvpn/easy-rsa
+cp -r /usr/share/easy-rsa/3/* /etc/openvpn/easy-rsa/
+cd /etc/openvpn/easy-rsa
+./easyrsa init-pki
+./easyrsa build-ca nopass
+./easyrsa gen-req server nopass
+./easyrsa sign-req server server
+./easyrsa gen-dh
+openvpn --genkey --secret /etc/openvpn/ta.key
+cp pki/ca.crt pki/issued/server.crt pki/private/server.key pki/dh.pem /etc/openvpn/
+cp /etc/openvpn/ta.key /etc/openvpn/
 vi /etc/openvpn/server.conf
 
-cd /openvpn-ca
-vi vars
-set_var EASYRSA_REQ_COUNTRY    "US"
-set_var EASYRSA_REQ_PROVINCE   "California"
-set_var EASYRSA_REQ_CITY       "San Francisco"
-set_var EASYRSA_REQ_ORG        "MyOrg"
-set_var EASYRSA_REQ_EMAIL      "admin@example.com"
-set_var EASYRSA_REQ_OU         "MyOrgUnit"
-set_var EASYRSA_KEY_SIZE       2048
-set_var EASYRSA_ALGO           rsa
-set_var EASYRSA_CA_EXPIRE      3650
-set_var EASYRSA_CERT_EXPIRE    3650
-set_var EASYRSA_NS_SUPPORT     "yes"
-set_var EASYRSA_NS_COMMENT     "OpenVPN"
-
-source ./vars
-./clean-all
-./build-ca
-./build-key-server server
-./build-dh
-./build-key client
-cp ~/openvpn-ca/keys/* /etc/openvpn/
+port 1194
+proto udp
+dev tun
+ca /etc/openvpn/ca.crt
+cert /etc/openvpn/server.crt
+key /etc/openvpn/server.key
+dh /etc/openvpn/dh.pem
+tls-auth /etc/openvpn/ta.key 0
+server 10.8.0.0 255.255.255.0
+push "redirect-gateway def1 bypass-dhcp"
+push "dhcp-option DNS 8.8.8.8"
+keepalive 10 120
+cipher AES-256-CBC
+auth SHA256
+persist-key
+persist-tun
+status /var/log/openvpn-status.log
+log-append /var/log/openvpn.log
+verb 3
 systemctl start openvpn@server
 systemctl enable openvpn@server
-
-
+firewall-cmd --add-service=openvpn --permanent
+firewall-cmd --add-masquerade --permanent
+firewall-cmd --reload
 
 
 
