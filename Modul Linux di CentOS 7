@@ -62,6 +62,20 @@ cp /usr/share/doc/openvpn*/sample/sample-config-files/server.conf /etc/openvpn/
 vi /etc/openvpn/server.conf
 
 cd /openvpn-ca
+vi vars
+set_var EASYRSA_REQ_COUNTRY    "US"
+set_var EASYRSA_REQ_PROVINCE   "California"
+set_var EASYRSA_REQ_CITY       "San Francisco"
+set_var EASYRSA_REQ_ORG        "MyOrg"
+set_var EASYRSA_REQ_EMAIL      "admin@example.com"
+set_var EASYRSA_REQ_OU         "MyOrgUnit"
+set_var EASYRSA_KEY_SIZE       2048
+set_var EASYRSA_ALGO           rsa
+set_var EASYRSA_CA_EXPIRE      3650
+set_var EASYRSA_CERT_EXPIRE    3650
+set_var EASYRSA_NS_SUPPORT     "yes"
+set_var EASYRSA_NS_COMMENT     "OpenVPN"
+
 source ./vars
 ./clean-all
 ./build-ca
