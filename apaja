@@ -112,15 +112,21 @@ verb 3
 openvpn --config /etc/openvpn/client/client.ovpn
 
 Konfigurasi IDS
-yum install gcc make pcre-devel libpcap-devel libyaml-devel libnet-devel \
-libmaxminddb-devel jansson-devel nss-devel zlib-devel pfring-devel -y
-curl -o /etc/yum.repos.d/OISF.repo https://copr.fedorainfracloud.org/coprs/oisf/suricata/repo/epel-7/oisf-suricata-epel-7.repo
+sudo yum install -y libpcap-devel pcre-devel libyaml-devel jansson-devel nss-devel libcap-ng-devel 
+sudo yum install -y gcc gcc-c++ make autoconf automake libtool wget
+sudo yum install -y centos-release-scl
+sudo yum-config-manager --enable rhel-server-rhscl-7-rpms
+sudo yum install -y yum-plugin-copr
+sudo yum copr enable @oisf/suricata
+sudo yum install -y suricata
+suricata --build-info
+/etc/suricata/suricata.yaml
 
-yum install suricata -y
-vi /etc/suricata/suricata.yaml
-systemctl start suricata
-systemctl enable suricata
-systemctl status suricata
+
+
+
+
+
 
 ModEvasive dan ModSecurity
 yum install mod_evasive -y
